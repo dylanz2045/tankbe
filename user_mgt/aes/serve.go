@@ -20,8 +20,8 @@ func (*UserInfo) Encrypt(data string) (string, error) {
 	}
 	utils.Logger.Info("---->user_mgt/aes.Encrypt is run")
 	//先取出这个string，之后转成字节数组
-	byteKey := []byte(utils.AllConfig.Aeskey)
-	byteIv := []byte(utils.AllConfig.Aesiv)
+	byteKey := []byte("14a6bb6d350413fdf8a99354c7bf8240")
+	byteIv := []byte("5131c878caa614f1")
 
 	plaintext := []byte(data)
 	padding := aes.BlockSize - len(data)%aes.BlockSize

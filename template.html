@@ -1,0 +1,13 @@
+<!-- template.html -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>{{.Title}}</title>
+</head>
+<body>
+    <h1>{{.Title}}</h1>
+    <p>Welcome, {{.Name}}!</p>
+    {{if .LoggedIn}}<p>You are logged in.</p>{{else}}<p>You are not logged in.</p>{{end}}
+</body>
+</html>

@@ -8,11 +8,12 @@ import (
 
 var (
 	Logger    *zap.SugaredLogger
-	AllConfig = SetConfig()
+	AllConfig Config
 )
 
 func loginit() {
 	Logger = zap.L().Sugar()
+	// AllConfig = SetConfig()
 }
 func ValidateLogger() error {
 	// 检查utils.Logger是否为空

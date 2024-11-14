@@ -1,9 +1,11 @@
 package maintain
 
 import (
+	"context"
 	"fmt"
 	"net/http"
 	"time"
+	"user_mgt/utils"
 )
 
 // float64ToTime 将float64格式的时间转换为time.Time格式
@@ -37,4 +39,42 @@ func AddCoresHeader(w http.ResponseWriter) error {
 	w.Header().Set("Content-Type", "application/json")
 
 	return nil
+}
+
+// setToContext 将key-value存入context
+func setToContext(key, value string, ctx context.Context) (context.Context, error) {
+	// 检查key是否为空
+	if key == "" {
+		utils.Logger.Errorf("key is empty")
+		return ctx, fmt.Errorf("key is empty")
+	}
+
+	// 检查value是否为空
+	if value == "" {
+		utils.Logger.Errorf("value is empty")
+		return ctx, fmt.Errorf("value is empty")
+	}
+
+	// 将key-value存入context
+	ctx = context.WithValue(ctx, key, value)
+
+	return ctx, nil
+}
+
+// getFromContext 从context中获取key对应的value
+func getFromContext(key string, ctx context.Context) (string, error) {
+	// 检查key是否为空
+	if key == "" {
+		utils.Logger.Errorf("key is empty")
+		return "", fmt.Errorf("key is empty")
+	}
+
+	// 从context中获取key对应的value
+	value, ok := ctx.Value(key).(string)
+	if !ok {
+		utils.Logger.Errorf("failed to assert value to string")
+		return "", fmt.Errorf("failed to assert value to string")
+	}
+
+	return value, nil
 }

@@ -32,7 +32,7 @@ func (*JWTutils) GenerateToken(userID string, tokentype string) (string, error) 
 	claims["id"] = userID
 
 	// 签名并获取完整的编码后的字符串token
-	tokenString, err := Token.SignedString([]byte(utils.AllConfig.JwtSecret))
+	tokenString, err := Token.SignedString([]byte("holryLBFQUIVXYfqrg-HC4Bde3cYiZQoTFeoW_3J-ug"))
 	if err != nil {
 		utils.Logger.Errorf("生成Token失败：%v", err)
 		return "", err

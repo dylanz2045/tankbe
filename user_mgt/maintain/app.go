@@ -46,6 +46,7 @@ type OnlineUserMaintainer interface {
 	OSHandleSetUserOffline(string, time.Time) error
 	heartbreak(*websocket.Conn, string, chan string, chan bool)
 	OSCloseWebsocket(string) error
+	GetOnlineUserAmount() (int, error)
 }
 
 // 一个结构体，嵌入多个接口类型作为
@@ -63,6 +64,7 @@ type RegMaintainer struct {
 
 type connManager interface {
 	KeepAlive(ws *websocket.Conn)
+	CloseWebsocketHTTP(w http.ResponseWriter, r *http.Request)
 }
 
 // 这个是用于处理redis的一个全局变量，工厂函数

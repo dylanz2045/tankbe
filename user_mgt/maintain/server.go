@@ -442,5 +442,29 @@ func (guestMaintainer *GuestMaintainer) CloseWebSocket(userid string) error {
 		return nil
 	}
 	return fmt.Errorf("something wrong in CloseWebSocket")
-
+}
+func (regmaintainer *RegMaintainer) CloseWebsocketHTTP(w http.ResponseWriter, r *http.Request) {
+	err := utils.CheckLogger()
+	if err != nil {
+		fmt.Println("logger is nil")
+		os.Exit(-1)
+		return
+	}
+	utils.Logger.Info("CloseWebsocketHTTP is running")
+	regid, err := getFromContext("regid", r.Context())
+	if err != nil {
+		utils.Logger.Errorf("Failed to get regId from context:%v", err)
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+	var reconn GuestMaintainer
+	err = reconn.CloseWebSocket(regid)
+	if err != nil {
+		utils.Logger.Errorf("Failed to remove user:%v", err)
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+	utils.Logger.Infof("user %s is offline", regid)
+	// 返回成功
+	w.WriteHeader(http.StatusOK)
 }

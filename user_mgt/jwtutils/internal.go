@@ -26,7 +26,7 @@ func parseJWT(tokenstring string) (*jwt.Token, error) {
 			utils.Logger.Errorf("Token的签名不合法！:%v", token.Header["alg"])
 			return nil, fmt.Errorf("不合法的Token签名：%v", token.Header["alg"])
 		}
-		return []byte(utils.AllConfig.JwtSecret), nil
+		return []byte("holryLBFQUIVXYfqrg-HC4Bde3cYiZQoTFeoW_3J-ug"), nil
 	})
 	//若此时的Token是过期的话，上面的连接应该发不过来
 	if err != nil {

@@ -53,7 +53,7 @@ func Init() bool {
 		utils.Logger.Error("格式化调用者信息失败,初始化连接数据库失败")
 	}
 	// 组建连接数据库的语句
-	connStr := fmt.Sprintf("postgresql://%s:%s@%s:%s/%s", utils.AllConfig.DBUser, utils.AllConfig.DBPwd, utils.AllConfig.DBHOST, utils.AllConfig.DbPort, utils.AllConfig.DBName)
+	connStr := fmt.Sprintf("postgresql://%s:%s@%s:%s/%s", "tankuser", "cst4Ever", "localhost", "6900", "tankdb")
 
 	//创建连接池的配置
 	poolconfig, err := pgxpool.ParseConfig(connStr)

@@ -191,7 +191,6 @@ func (server *OnlineUserMaintainerServer) heartbreak(ws *websocket.Conn, userid 
 				failedRecMsg--
 				continue
 			}
-			utils.Logger.Infof("此时前端发送的信息为：%s", tokenstring)
 			if tokenstring == "close" {
 				quit <- true
 				return
@@ -361,4 +360,20 @@ func (server *OnlineUserMaintainerServer) OSHandleSetUserOffline(userid string, 
 		return fmt.Errorf("user %s is still active, can not be remove", userid)
 	}
 	return nil
+}
+
+func (server *OnlineUserMaintainerServer) GetOnlineUserAmount() (int, error) {
+	err := utils.CheckLogger()
+	if err != nil {
+		fmt.Println("Logger is nil")
+		os.Exit(-1)
+		return 0, err
+	}
+	// 获取所有活跃用户
+	activeUsers, err := rdb.ZRangeWithScores(ctx, activeusers, 0, -1).Result()
+	if err != nil {
+		utils.Logger.Errorf("failed to get all active activeUsers: %s", err)
+		return 0, err
+	}
+	return len(activeUsers), nil
 }
