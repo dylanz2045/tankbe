@@ -2,10 +2,14 @@ package auth
 
 import (
 	"encoding/json"
+	"errors"
 	"fmt"
+	"io"
 	"net/http"
 	"os"
+	"path/filepath"
 	"time"
+	"user_mgt/user_mgt/jwtutils"
 	"user_mgt/user_mgt/rand"
 	"user_mgt/utils"
 )
@@ -234,7 +238,7 @@ func (server *RegHTTPServer) Login(w http.ResponseWriter, r *http.Request) {
 
 }
 
-// 中间件，用于检验登录用户的游客ID是否过期，也就是防止API的攻击
+// 中间件，用于检验登录用户的游客ID是否过期，也就是防止API的攻击，这里还有一个作用就是将获取到的用户ID存到上下文，通过上下文进行获取用户的ID
 func (srg *GuestHTTPServer) AuthMiddleWare(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		err := utils.CheckLogger()
@@ -279,4 +283,138 @@ func (srg *GuestHTTPServer) AuthMiddleWare(next http.Handler) http.Handler {
 
 		next.ServeHTTP(w, r.WithContext(ctx))
 	})
+}
+
+// 验证此时已经登录的用户的token
+func (server *RegHTTPServer) AuthMiddelWare(next http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		// 检查utils.Logger是否为空
+		err := utils.ValidateLogger()
+		if err != nil {
+			fmt.Println(err)
+			return
+		}
+		// 从Cookie中获取token
+		tokenCookie, err := r.Cookie("token")
+		if err != nil {
+			if errors.Is(err, http.ErrNoCookie) {
+				utils.Logger.Errorf("No token in cookie")
+				http.Error(w, "No token in cookie", http.StatusBadRequest)
+			}
+			utils.Logger.Errorf("Failed to get token from cookie: %v", err)
+			http.Error(w, "Internal Server Error", http.StatusInternalServerError)
+			return
+		}
+		if tokenCookie == nil {
+			utils.Logger.Errorf("tokenCookie is nil")
+			http.Error(w, "Internal Server Error", http.StatusInternalServerError)
+			return
+		}
+		utils.Logger.Infof("receive tokenCookie: %v", tokenCookie)
+
+		token := tokenCookie.Value
+
+		// 验证token
+		jwtService := jwtutils.NewJWTserve()
+		isToken, userId, err := jwtService.VerifyAndGetIdFromToken(token, jwtutils.TokenTypeRegistered)
+		if err != nil {
+			utils.Logger.Errorf("check token failed: %s", err.Error())
+			http.Error(w, "Unauthorized", http.StatusUnauthorized)
+			return
+		}
+		if isToken {
+			utils.Logger.Errorf("message is not a token")
+			http.Error(w, "Unauthorized", http.StatusUnauthorized)
+			return
+		}
+		if userId == "" {
+			utils.Logger.Errorf("userId is empty")
+			http.Error(w, "Unauthorized", http.StatusUnauthorized)
+			return
+		}
+
+		// 将userId存入HTTP请求context
+		ctx, err := setToContext(r.Context(), "userId", userId)
+		if err != nil {
+			utils.Logger.Errorf("cannot set ID to Context")
+			http.Error(w, "Unauthorized", http.StatusInternalServerError)
+			return
+		}
+
+		// 调用下一个处理程序
+		next.ServeHTTP(w, r.WithContext(ctx))
+	})
+}
+
+// 假设我现在把头像就放在当前的目录之下，是需要添加上user_mgt之下的
+func (server *RegHTTPServer) GetAvatar(w http.ResponseWriter, r *http.Request) {
+	// 检查utils.Logger是否为空
+	err := utils.ValidateLogger()
+	if err != nil {
+		fmt.Println(err)
+		return
+	}
+	//需要从上下文中获取用户的ID
+	userID, err := getFromContest(r.Context(), "userId")
+	if err != nil {
+		utils.Logger.Errorf("cannot get userid from context!:%v", err)
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+	if userID == "" {
+		utils.Logger.Errorf("got userid is empty!")
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+	//这里是已经获取到存在数据库中的头像地址
+	avatarpath, err := RegDBServer.GetAvatar(userID)
+	if err != nil {
+		utils.Logger.Errorf("GetAvatar is failed! :%v", err)
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+	if avatarpath == "" {
+		utils.Logger.Errorf("filepath is empty! :%v", err)
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+	truepath := filepath.Join("user_mgt", avatarpath)
+	exist, err := IsAvatarPathExists(&truepath)
+	if err != nil {
+		utils.Logger.Errorf("cannot find avatar from that path!:%v", err)
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+	if !exist {
+		utils.Logger.Errorf("cannot  find that avatar")
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+	//打开这个文件，之后就可以对这个文件进行操作了
+	file, err := os.Open(truepath)
+	if err != nil {
+		utils.Logger.Errorf("ReadFile failed, err:%v", err)
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+	defer file.Close()
+	//以二进制的形式发送到前端
+	w.Header().Set("Content-Type", "image/jpeg")
+	_, err = io.Copy(w, file)
+	if err != nil {
+		utils.Logger.Errorf("w.Write failed, err:%v", err)
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+}
+
+// 用于验证数据库里是否存在这个属性，先获取头像，再修改，直接进行写文件的形式。
+func (server *RegHTTPServer) VerifyAndChangeAvatar(w http.ResponseWriter, r *http.Request) {
+	// 检查utils.Logger是否为空
+	err := utils.ValidateLogger()
+	if err != nil {
+		fmt.Println(err)
+		return
+	}
+	//检查完之后，就需要从数据库里面进行修改，之后执行一次获取头像的操作
 }

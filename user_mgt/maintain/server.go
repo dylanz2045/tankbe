@@ -464,7 +464,7 @@ func (regmaintainer *RegMaintainer) CloseWebsocketHTTP(w http.ResponseWriter, r 
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
-	utils.Logger.Infof("user %s is offline", regid)
+	utils.Logger.Infof("wait for user %s being offline", regid)
 	// 返回成功
 	w.WriteHeader(http.StatusOK)
 }

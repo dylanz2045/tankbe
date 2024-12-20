@@ -147,3 +147,27 @@ func (guestdbserver *GuestDBServer) UpdateLastLoginAt(userid string) error {
 	tx.Commit(ctx)
 	return nil
 }
+
+func (regdbserver *RegDBServer) GetAvatar(userid string) (string, error) {
+	err := utils.CheckLogger()
+	if err != nil {
+		fmt.Println("Logger is nil")
+		os.Exit(-1)
+		return "", fmt.Errorf("Logger is nil")
+	}
+	if userid == "" {
+		utils.Logger.Errorf("userid is nil")
+		return "", fmt.Errorf("userid is nil")
+	}
+	var filepath string
+	err = pool.QueryRow(context.Background(), query.getAvatar, userid).Scan(&filepath)
+	if err != nil {
+		utils.Logger.Errorf("cannout execte with sql!:%v", err)
+		return "", fmt.Errorf("getAvatar is failed :%v", err)
+	}
+	if filepath == "" {
+		utils.Logger.Errorf("cannout execte with sql!:%v", err)
+		return "", fmt.Errorf("getAvatar is failed :%v", err)
+	}
+	return filepath, nil
+}

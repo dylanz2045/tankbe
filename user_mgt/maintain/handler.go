@@ -62,6 +62,8 @@ import (
 //		}
 //		utils.Logger.Infof("user %s is online", userID)
 //	}
+//
+// 调度用户的在线状态，需要分为两种情况
 func (server *OnlineUserMaintainerServer) OSCloseWebsocket(userid string) error {
 	err := utils.CheckLogger()
 	if err != nil {

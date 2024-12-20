@@ -14,6 +14,7 @@ var (
 
 type Query struct {
 	getUserNickName string
+	getAvatar       string
 }
 
 type GuestDBServer struct {
@@ -27,6 +28,16 @@ type GuestDBHandle interface {
 	UpdateLastLoginAt(string) error
 }
 
+type RegDBServer struct {
+}
+type RegDBHandle interface {
+	GetAvatar(string) (string, error)
+}
+
 func NewGuestDBServer() GuestDBHandle {
 	return &GuestDBServer{}
+}
+
+func NewRegDBServer() RegDBHandle {
+	return &RegDBServer{}
 }

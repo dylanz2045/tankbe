@@ -13,7 +13,7 @@ var (
 
 func loginit() {
 	Logger = zap.L().Sugar()
-	// AllConfig = SetConfig()
+	AllConfig = SetConfig()
 }
 func ValidateLogger() error {
 	// 检查utils.Logger是否为空

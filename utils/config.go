@@ -2,8 +2,6 @@ package utils
 
 import (
 	"fmt"
-	"os"
-	"path/filepath"
 
 	"github.com/spf13/viper"
 )
@@ -21,19 +19,11 @@ type Config struct {
 	JwtSecret    string `mapstructure:"JWTSECRET"`
 	Aeskey       string `mapstructure:"USERINFOkey"`
 	Aesiv        string `mapstructure:"USERINFOiv"`
+	DB_SOURCE    string `mapstructure:"DB_SOURCE`
 }
 
 func LoadConfig(path string) (config Config, err error) {
-	// 获取当前工作目录
-	wd, err := os.Getwd()
-	if err != nil {
-		return config, fmt.Errorf("failed to get working directory: %w", err)
-	}
-
-	// 构建配置文件的绝对路径
-	configPath := filepath.Join(wd)
-
-	viper.AddConfigPath(configPath)
+	viper.AddConfigPath(path)
 	viper.SetConfigName("app")
 	viper.SetConfigType("env")
 
@@ -47,9 +37,9 @@ func LoadConfig(path string) (config Config, err error) {
 }
 
 func SetConfig() Config {
-	config, err := LoadConfig("..")
+	config, err := LoadConfig(".")
 	if err != nil {
-		fmt.Println("无法读取配置件")
+		fmt.Println("无法读取配置文件")
 		return Config{}
 	}
 	return config

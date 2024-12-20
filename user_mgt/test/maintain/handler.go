@@ -49,7 +49,7 @@ func (*HandlerTestImpl) TestGuestKeepAlive(t *testing.T) {
 	defer server.Close()
 
 	// 解析WebSocket URL
-	wsURL := "ws" + server.URL[len("http"):] + "/echo"
+	wsURL := "ws" + server.URL[len("http"):]
 
 	// 创建WebSocket连接
 	ws, err := websocket.Dial(wsURL, "", "http://localhost/")

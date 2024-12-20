@@ -16,6 +16,10 @@ func Init() {
 		utils.Logger.Fatalf("获取数据库连接池失败")
 	}
 	utils.Logger.Infof("Init db pool success")
+
+	query.getUserNickName = `SELECT nickname FROM user_mgt.t_user WHERE id = $1;`
+
+	query.getAvatar = `SELECT avatar_path FROM user_mgt.t_user WHERE id = $1;`
 }
 
 // 如果在错误的情况下，必须关闭这个连接池，防止数据库被攻击

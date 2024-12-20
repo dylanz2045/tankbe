@@ -44,6 +44,7 @@ var (
 	RegServer   = &RegHTTPServer{}
 	//用于操作游客数据库接口主体
 	GuestDBServer = db.NewGuestDBServer()
+	RegDBServer   = db.NewRegDBServer()
 	//关于JWT的处理包函数
 	JWThandle                = jwtutils.NewJWTserve()
 	OnlineMaintainer         = maintain.NewOnlineUser()

@@ -90,3 +90,20 @@ func sendErrorMessageToFe(w http.ResponseWriter, code int, message string) error
 
 	return nil
 }
+
+// IsAvatarPathExists 检测头像路径是否存在，不存在设置为默认路径
+func IsAvatarPathExists(path *string) (bool, error) {
+	//检测传入的path是否为空
+	if path == nil {
+		utils.Logger.Errorf("传入头像路径为空")
+		return false, fmt.Errorf("传入头像路径为空")
+	}
+	//检测路径下是否有图片
+	_, err := os.Stat(*path)
+	if os.IsNotExist(err) {
+		//路径不存在,设置为默认头像路径
+		utils.Logger.Infof("头像路径:%v", *path)
+		return false, nil
+	}
+	return true, nil
+}

@@ -39,11 +39,10 @@ func NewOnlineUser() OnlineUserMaintainer {
 }
 
 func Init() {
-	regmaintainerPtr := &regmaintainer
 	http.Handle("/msg/GuestKeepAlive", websocket.Handler(guestMaintainer.KeepAlive))
 	http.Handle("/api/GetActiveUsers", http.HandlerFunc(guestRedisMaintainer.GetActiveUsers))
 	http.Handle("/msg/RegKeepAlive", websocket.Handler(regmaintainer.KeepAlive))
-	http.Handle("/api/CloseRegWebSocket", authMiddleware(http.HandlerFunc(regmaintainerPtr.CloseWebsocketHTTP)))
+	http.Handle("/api/CloseRegWebSocket", authMiddleware(http.HandlerFunc(regmaintainer.CloseWebsocketHTTP)))
 
 	// 初始化context
 	ctx = context.Background()
@@ -71,9 +70,9 @@ func InitRdeisConn() error {
 		fmt.Println(err)
 		return nil
 	}
-	utils.Logger.Infof("trying to connect to redis:%s", "0.0.0.0:6910")
+	utils.Logger.Infof("trying to connect to redis:%s", Config.RedisAddress)
 	rdb = redis.NewClient(&redis.Options{
-		Addr:     "0.0.0.0:6910",
+		Addr:     Config.RedisAddress,
 		Password: "QDFAS23SDVasdfQWFAS5EA42A29282628295E_7B7Ddasdfasdflc2Cvsdffffdfdazzxcvnm3Fasdf21235E262A2829_2B7C7D7BPOIUYTREWQ3ALKJHGFDSA3F3E3CMNBVCXZqwertyuiopasdfghjklzxcvbnm2C2F5B5D5C1234567890_3DadfdsdfWDFSwfdFSFA4023235E2628262A2829JHKljkL3ANM3C3EVBNMaEFesvrgwRTHDFGNBasdfWSVSDFSDVXCVXGDFGDFGSFWVF",
 		DB:       0,
 		PoolSize: 100,

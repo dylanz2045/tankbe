@@ -5,6 +5,7 @@ import (
 	"net/http"
 	"sync"
 	"time"
+	"user_mgt/utils"
 
 	"github.com/redis/go-redis/v9"
 	"golang.org/x/net/websocket"
@@ -15,6 +16,7 @@ var (
 	rdb            *redis.Client // Redis客户端
 	ctx            context.Context
 	WebsocketConns sync.Map //用于在服务器内存中保存websocket变量
+	Config         = utils.SetConfig()
 )
 
 const (
